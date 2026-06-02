@@ -1,0 +1,26 @@
+{
+  "name": "block-crush-daily",
+  "version": "1.0.0",
+  "description": "A daily block puzzle game with merge power-ups. Fit pieces, clear rows, crush your daily challenge.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fredfelix53/block-crush-daily.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/fredfelix53/block-crush-daily/issues"
+  },
+  "homepage": "https://github.com/fredfelix53/block-crush-daily#readme",
+  "dependencies": {
+    "pngjs": "^7.0.0",
+    "puppeteer-core": "^25.1.0",
+    "sharp": "^0.34.5"
+  }
+}
