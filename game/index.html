@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+  <meta name="theme-color" content="#1a1a2e">
+  <title>Block Crush Daily</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header>
+      <h1>BLOCK CRUSH</h1>
+      <div class="header-info">
+        <div class="score-box">
+          <span class="label">SCORE</span>
+          <span id="score">0</span>
+        </div>
+        <div class="high-box">
+          <span class="label">BEST</span>
+          <span id="highscore">0</span>
+        </div>
+        <div class="mode-box">
+          <span id="mode-label">DAILY</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Energy bar -->
+    <div id="energy-bar">
+      <div class="energy-fill" id="energy-fill"></div>
+      <span id="energy-text">⚡ 0/5</span>
+    </div>
+
+    <!-- Game board -->
+    <div id="board-container">
+      <canvas id="board" width="300" height="300"></canvas>
+    </div>
+
+    <!-- Power-ups -->
+    <div id="powerups">
+      <button class="pu-btn" id="pu-bomb" disabled>
+        <span class="pu-icon">💣</span>
+        <span class="pu-label">Bomb</span>
+        <span class="pu-cost">⚡3</span>
+      </button>
+      <button class="pu-btn" id="pu-hammer" disabled>
+        <span class="pu-icon">🔨</span>
+        <span class="pu-label">Hammer</span>
+        <span class="pu-cost">⚡2</span>
+      </button>
+      <button class="pu-btn" id="pu-shuffle" disabled>
+        <span class="pu-icon">🔀</span>
+        <span class="pu-label">Shuffle</span>
+        <span class="pu-cost">⚡4</span>
+      </button>
+    </div>
+
+    <!-- Piece tray -->
+    <div id="tray-container">
+      <canvas id="tray" width="300" height="100"></canvas>
+    </div>
+
+    <!-- Action buttons -->
+    <div id="actions">
+      <button id="btn-daily" class="action-btn active">Daily</button>
+      <button id="btn-practice" class="action-btn">Practice</button>
+      <button id="btn-restart" class="action-btn danger">↻</button>
+    </div>
+
+    <!-- Banner ad placeholder -->
+    <div id="ad-banner">
+      <span class="ad-text">[ Ad Space ]</span>
+    </div>
+
+    <!-- Rewarded ad button -->
+    <div id="reward-section">
+      <button id="btn-reward-double" class="reward-btn" disabled>
+        📺 Watch ad to double reward
+      </button>
+      <button id="btn-reward-energy" class="reward-btn" disabled>
+        📺 Watch ad for +2 ⚡
+      </button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
