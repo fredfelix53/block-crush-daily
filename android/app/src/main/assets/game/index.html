@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0a1a">
+  <title>Block Crush Daily</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <!-- HUD Bar -->
+  <div id="hud-bar">
+    <div class="hud-left">
+      <span class="hud-title">🧱 BLOCK CRUSH</span>
+    </div>
+    <div class="hud-right">
+      <span class="hud-item lvl-icon" id="shop-btn">
+        <span>⚡ Lv.<span id="hud-level">1</span></span>
+      </span>
+      <span class="hud-item" data-action="shop" onclick="if(window.ShopUI)ShopUI.showTab('upgrades')">
+        <span class="lvl-icon">⚡</span>
+      </span>
+      <span class="hud-item">
+        <span class="coin-icon">🪙</span>
+        <span id="hud-coins">100</span>
+      </span>
+      <span class="hud-item">
+        <span class="gem-icon">💎</span>
+        <span id="hud-gems">0</span>
+      </span>
+      <!-- New Feature Buttons -->
+      <span class="hud-item hud-btn" id="btn-challenges" onclick="if(window.ChallengesSystem)ChallengesSystem.showChallengesModal()" title="Daily Challenges">📋</span>
+      <span class="hud-item hud-btn" id="btn-leaderboard" onclick="if(window.RetentionSystem)RetentionSystem.showLeaderboardModal()" title="Leaderboard">🏆</span>
+      <span class="hud-item hud-btn" id="btn-collectibles" onclick="if(window.CollectiblesSystem)CollectiblesSystem.showCollectiblesModal()" title="Collectibles">🏅</span>
+      <span class="hud-item hud-btn" id="btn-daily" onclick="if(window.RetentionSystem)RetentionSystem.showLoginRewardsModal()" title="Daily Login">📅</span>
+      <span class="hud-item hud-btn" id="btn-ad-reward" onclick="if(window.AdsManager)AdsManager.extraCoins()" title="Watch ad for coins">📺</span>
+    </div>
+  </div>
+
+  <!-- Game Container -->
+  <div id="game-container">
+    <!-- Score panel -->
+    <div id="score-display">
+      <div class="score-label">Score</div>
+      <div class="score-value" id="score-value">0</div>
+    </div>
+
+    <!-- Next piece panel -->
+    <div id="next-piece-panel">
+      <h3>Next</h3>
+      <canvas id="next-piece-canvas"></canvas>
+    </div>
+
+    <!-- Energy bar -->
+    <div id="energy-bar" style="position:absolute;top:52px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;background:var(--bg-card);border-radius:20px;padding:4px 16px;border:1px solid rgba(255,255,255,0.08);">
+      <span>⚡</span>
+      <div style="width:100px;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">
+        <div id="energy-fill" style="height:100%;width:100%;background:linear-gradient(90deg,#4facfe,#a18cd1);border-radius:3px;transition:width 0.3s ease;"></div>
+      </div>
+      <span id="combo-display" style="font-size:13px;font-weight:600;color:var(--accent-blue);">5/5</span>
+    </div>
+
+    <!-- Game Board Canvas -->
+    <canvas id="game-board"></canvas>
+
+    <!-- Buttons -->
+    <div id="button-bar">
+      <button class="game-btn btn-primary" id="restart-btn">▶ Play</button>
+      <button class="game-btn btn-shop" id="button-shop">🛒 Shop</button>
+      <button class="game-btn btn-upgrade" onclick="if(window.ShopUI){ShopUI.open();ShopUI.showTab('upgrades')}">⚡ Upgrade</button>
+      <button class="game-btn btn-powerup" id="button-ach">🏆</button>
+    </div>
+  </div>
+
+  <!-- Game Over Overlay -->
+  <div id="game-over-overlay">
+    <div class="game-over-box">
+      <h2>Game Over</h2>
+      <div class="final-score" id="final-score">0</div>
+      <div class="stat-row">
+        <span>Lines: <strong id="go-lines">0</strong></span>
+        <span>Best: <strong id="go-combo">0</strong></span>
+      </div>
+      <div class="btn-group">
+        <button class="game-btn btn-primary" id="restart-btn2" onclick="startGame()">▶ Play Again</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification -->
+  <div id="notification"></div>
+
+  <!-- Scripts -->
+  <script src="visuals.js"></script>
+  <script src="progression.js"></script>
+  <script src="shop.js"></script>
+  <!-- New Framework Modules -->
+  <script src="ads-manager.js"></script>
+  <script src="challenges-system.js"></script>
+  <script src="store-rotator.js"></script>
+  <script src="retention-system.js"></script>
+  <script src="collectibles-system.js"></script>
+  <script src="tutorial-system.js"></script>
+  <!-- Game Engine (initializes everything) -->
+  <script src="game.js"></script>
+</body>
+</html>
