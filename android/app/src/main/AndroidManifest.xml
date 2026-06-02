@@ -8,7 +8,7 @@
         android:allowBackup="true"
         android:label="Block Crush Daily"
         android:supportsRtl="true"
-        android:theme="@style/Theme.BlockCrush"
+        android:theme="@style/Theme.Game"
         android:hardwareAccelerated="true"
         android:resizeableActivity="false"
         android:usesCleartextTraffic="true"
