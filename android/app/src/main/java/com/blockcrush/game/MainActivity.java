@@ -3,7 +3,6 @@ package com.blockcrush.game;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -30,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
     private WebView webView;
     private AdView bannerAdView;
     private RewardedAd rewardedAd;
-    private boolean adLoaded = false;
     private static final String TAG = "BlockCrush";
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -42,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         // Setup WebView FIRST - before AdMob - so game loads even if ads fail
         setupWebView();
 
-        // Initialize AdMob (wrapped to prevent crash if test ID issues)
+        // Initialize AdMob (wrapped to prevent crash)
         try {
             MobileAds.initialize(this, new OnInitializationCompleteListener() {
                 @Override
@@ -52,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         } catch (Exception e) {
-            Log.e(TAG, "AdMob init failed (non-fatal): " + e.getMessage());
+            Log.e(TAG, "AdMob init failed: " + e.getMessage());
         }
     }
 
@@ -83,47 +81,32 @@ public class MainActivity extends AppCompatActivity {
                 public void onPageFinished(WebView view, String url) {
                     super.onPageFinished(view, url);
                     Log.d(TAG, "Game loaded: " + url);
-
-                    // Expose ad functions to JavaScript
                     view.evaluateJavascript(
-                        "window.AndroidAds = {" +
-                        "  showRewarded: function(callback) {" +
-                        "    document.AD_PENDING = callback;" +
-                        "    document.AD_TRIGGER = Date.now();" +
-                        "  }" +
-                        "};", null);
-
-                    // Notify JS that we're ready
+                        "window.AndroidAds = {};", null);
                     view.evaluateJavascript(
                         "if(typeof window.onAndroidReady === 'function') window.onAndroidReady();", null);
                 }
 
                 @Override
                 public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                    Log.e(TAG, "WebView error: " + errorCode + " - " + description);
+                    Log.e(TAG, "WebView error " + errorCode + ": " + description);
                 }
             });
 
-            // JavaScript bridge for ad callbacks
             webView.addJavascriptInterface(new Object() {
                 @JavascriptInterface
                 public void onAdWatched() {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.d(TAG, "Ad watched callback received");
-                            loadRewardedAd(); // preload next ad
-                        }
+                    runOnUiThread(() -> {
+                        Log.d(TAG, "Ad watched callback");
+                        loadRewardedAd();
                     });
                 }
-
                 @JavascriptInterface
                 public void logMessage(String message) {
                     Log.d(TAG, "JS: " + message);
                 }
             }, "AdBridge");
 
-            // Load game from assets
             webView.loadUrl("file:///android_asset/game/index.html");
         } catch (Exception e) {
             Log.e(TAG, "WebView setup failed: " + e.getMessage());
@@ -139,9 +122,7 @@ public class MainActivity extends AppCompatActivity {
             bannerAdView.setAdUnitId("ca-app-pub-3940256099942544/6300978111");
             bannerAdView.setAdSize(AdSize.SMART_BANNER);
             adContainer.addView(bannerAdView);
-
-            AdRequest request = new AdRequest.Builder().build();
-            bannerAdView.loadAd(request);
+            bannerAdView.loadAd(new AdRequest.Builder().build());
         } catch (Exception e) {
             Log.e(TAG, "Banner ad failed: " + e.getMessage());
         }
@@ -155,16 +136,13 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onAdLoaded(RewardedAd ad) {
                         rewardedAd = ad;
-                        adLoaded = true;
                         if (webView != null) {
                             webView.evaluateJavascript(
                                 "if(typeof window.onRewardedReady === 'function') window.onRewardedReady();", null);
                         }
                     }
-
                     @Override
                     public void onAdFailedToLoad(LoadAdError loadAdError) {
-                        adLoaded = false;
                         Log.w(TAG, "Rewarded ad failed: " + loadAdError.getMessage());
                     }
                 });
@@ -175,20 +153,14 @@ public class MainActivity extends AppCompatActivity {
 
     @android.webkit.JavascriptInterface
     public void showRewardedAd() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (rewardedAd != null) {
-                    rewardedAd.show(MainActivity.this, new OnUserEarnedRewardListener() {
-                        @Override
-                        public void onUserEarnedReward(RewardItem rewardItem) {
-                            if (webView != null) {
-                                webView.evaluateJavascript(
-                                    "if(typeof window.onAdReward === 'function') window.onAdReward();", null);
-                            }
-                        }
-                    });
-                }
+        runOnUiThread(() -> {
+            if (rewardedAd != null) {
+                rewardedAd.show(MainActivity.this, rewardItem -> {
+                    if (webView != null) {
+                        webView.evaluateJavascript(
+                            "if(typeof window.onAdReward === 'function') window.onAdReward();", null);
+                    }
+                });
             }
         });
     }
