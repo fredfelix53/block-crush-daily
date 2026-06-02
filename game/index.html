@@ -2,110 +2,107 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-  <meta name="theme-color" content="#1a1a2e">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0a1a">
   <title>Block Crush Daily</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <div id="app">
-    <!-- Header -->
-    <header>
-      <div class="header-top">
-        <h1>BLOCK CRUSH</h1>
-        <div class="header-buttons">
-          <button id="btn-shop" class="icon-btn" onclick="window.toggleShop()" title="Shop">🛒</button>
-          <button id="btn-achievements" class="icon-btn" onclick="window.toggleAchievements()" title="Achievements">🏆</button>
-        </div>
-      </div>
-      <div class="header-info">
-        <div class="score-box">
-          <span class="label">SCORE</span>
-          <span id="score">0</span>
-        </div>
-        <div class="high-box">
-          <span class="label">BEST</span>
-          <span id="highscore">0</span>
-        </div>
-        <div class="mode-box">
-          <span id="mode-label">DAILY</span>
-        </div>
-        <div class="coin-box" id="coin-display" onclick="window.toggleShop()">
-          <span class="coin-icon">🪙</span>
-          <span id="coin-amount">0</span>
-        </div>
-      </div>
-    </header>
-
-    <!-- Energy bar -->
-    <div id="energy-bar">
-      <div class="energy-fill" id="energy-fill"></div>
-      <span id="energy-text">⚡ 0/5</span>
+  <!-- HUD Bar -->
+  <div id="hud-bar">
+    <div class="hud-left">
+      <span class="hud-title">🧱 BLOCK CRUSH</span>
     </div>
-
-    <!-- XP bar -->
-    <div id="xp-bar">
-      <div class="xp-fill" id="xp-fill"></div>
-      <span id="xp-text">LVL 1</span>
-    </div>
-
-    <!-- Game board -->
-    <div id="board-container">
-      <canvas id="board" width="300" height="300"></canvas>
-    </div>
-
-    <!-- Power-ups -->
-    <div id="powerups">
-      <button class="pu-btn" id="pu-bomb">
-        <span class="pu-icon">💣</span>
-        <span class="pu-label">Bomb</span>
-        <span class="pu-cost">⚡3</span>
-        <span class="pu-count" id="pu-count-bomb">0</span>
-      </button>
-      <button class="pu-btn" id="pu-hammer">
-        <span class="pu-icon">🔨</span>
-        <span class="pu-label">Hammer</span>
-        <span class="pu-cost">⚡2</span>
-        <span class="pu-count" id="pu-count-hammer">0</span>
-      </button>
-      <button class="pu-btn" id="pu-shuffle">
-        <span class="pu-icon">🔀</span>
-        <span class="pu-label">Shuffle</span>
-        <span class="pu-cost">⚡4</span>
-        <span class="pu-count" id="pu-count-shuffle">0</span>
-      </button>
-    </div>
-
-    <!-- Piece tray -->
-    <div id="tray-container">
-      <canvas id="tray" width="300" height="100"></canvas>
-    </div>
-
-    <!-- Action buttons -->
-    <div id="actions">
-      <button id="btn-daily" class="action-btn active">Daily</button>
-      <button id="btn-practice" class="action-btn">Practice</button>
-      <button id="btn-restart" class="action-btn danger">↻</button>
-    </div>
-
-    <!-- Banner ad placeholder -->
-    <div id="ad-banner">
-      <span class="ad-text">[ Ad Space ]</span>
-    </div>
-
-    <!-- Rewarded ad button -->
-    <div id="reward-section">
-      <button id="btn-reward-double" class="reward-btn" disabled>
-        📺 Watch ad to double reward
-      </button>
-      <button id="btn-reward-energy" class="reward-btn" disabled>
-        📺 Watch ad for +2 ⚡
-      </button>
+    <div class="hud-right">
+      <span class="hud-item lvl-icon" id="shop-btn">
+        <span>⚡ Lv.<span id="hud-level">1</span></span>
+      </span>
+      <span class="hud-item" data-action="shop" onclick="if(window.ShopUI)ShopUI.showTab('upgrades')">
+        <span class="lvl-icon">⚡</span>
+      </span>
+      <span class="hud-item">
+        <span class="coin-icon">🪙</span>
+        <span id="hud-coins">100</span>
+      </span>
+      <span class="hud-item">
+        <span class="gem-icon">💎</span>
+        <span id="hud-gems">0</span>
+      </span>
+      <!-- New Feature Buttons -->
+      <span class="hud-item hud-btn" id="btn-challenges" onclick="if(window.ChallengesSystem)ChallengesSystem.showChallengesModal()" title="Daily Challenges">📋</span>
+      <span class="hud-item hud-btn" id="btn-leaderboard" onclick="if(window.RetentionSystem)RetentionSystem.showLeaderboardModal()" title="Leaderboard">🏆</span>
+      <span class="hud-item hud-btn" id="btn-collectibles" onclick="if(window.CollectiblesSystem)CollectiblesSystem.showCollectiblesModal()" title="Collectibles">🏅</span>
+      <span class="hud-item hud-btn" id="btn-daily" onclick="if(window.RetentionSystem)RetentionSystem.showLoginRewardsModal()" title="Daily Login">📅</span>
+      <span class="hud-item hud-btn" id="btn-ad-reward" onclick="if(window.AdsManager)AdsManager.extraCoins()" title="Watch ad for coins">📺</span>
     </div>
   </div>
 
+  <!-- Game Container -->
+  <div id="game-container">
+    <!-- Score panel -->
+    <div id="score-display">
+      <div class="score-label">Score</div>
+      <div class="score-value" id="score-value">0</div>
+    </div>
+
+    <!-- Next piece panel -->
+    <div id="next-piece-panel">
+      <h3>Next</h3>
+      <canvas id="next-piece-canvas"></canvas>
+    </div>
+
+    <!-- Energy bar -->
+    <div id="energy-bar" style="position:absolute;top:52px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;background:var(--bg-card);border-radius:20px;padding:4px 16px;border:1px solid rgba(255,255,255,0.08);">
+      <span>⚡</span>
+      <div style="width:100px;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">
+        <div id="energy-fill" style="height:100%;width:100%;background:linear-gradient(90deg,#4facfe,#a18cd1);border-radius:3px;transition:width 0.3s ease;"></div>
+      </div>
+      <span id="combo-display" style="font-size:13px;font-weight:600;color:var(--accent-blue);">5/5</span>
+    </div>
+
+    <!-- Game Board Canvas -->
+    <canvas id="game-board"></canvas>
+
+    <!-- Buttons -->
+    <div id="button-bar">
+      <button class="game-btn btn-primary" id="restart-btn">▶ Play</button>
+      <button class="game-btn btn-shop" id="button-shop">🛒 Shop</button>
+      <button class="game-btn btn-upgrade" onclick="if(window.ShopUI){ShopUI.open();ShopUI.showTab('upgrades')}">⚡ Upgrade</button>
+      <button class="game-btn btn-powerup" id="button-ach">🏆</button>
+    </div>
+  </div>
+
+  <!-- Game Over Overlay -->
+  <div id="game-over-overlay">
+    <div class="game-over-box">
+      <h2>Game Over</h2>
+      <div class="final-score" id="final-score">0</div>
+      <div class="stat-row">
+        <span>Lines: <strong id="go-lines">0</strong></span>
+        <span>Best: <strong id="go-combo">0</strong></span>
+      </div>
+      <div class="btn-group">
+        <button class="game-btn btn-primary" id="restart-btn2" onclick="startGame()">▶ Play Again</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification -->
+  <div id="notification"></div>
+
+  <!-- Scripts -->
+  <script src="visuals.js"></script>
   <script src="progression.js"></script>
   <script src="shop.js"></script>
+  <!-- New Framework Modules -->
+  <script src="ads-manager.js"></script>
+  <script src="challenges-system.js"></script>
+  <script src="store-rotator.js"></script>
+  <script src="retention-system.js"></script>
+  <script src="collectibles-system.js"></script>
+  <script src="tutorial-system.js"></script>
+  <!-- Game Engine (initializes everything) -->
   <script src="game.js"></script>
 </body>
 </html>
