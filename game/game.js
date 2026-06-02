@@ -634,9 +634,9 @@ function init() {
   // Ads Manager (with real AdMob IDs)
   if (window.AdsManager) {
     AdsManager.init({
-      rewardedId: 'ca-app-pub-3940256099942544/5224354917',
-      interstitialId: 'ca-app-pub-3940256099942544/1033173712',
-      bannerId: 'ca-app-pub-3940256099942544/6300978111',
+      rewardedId: 'ca-app-pub-7122196431098987/8220703155',
+      interstitialId: 'ca-app-pub-7122196431098987/9367253540',
+      bannerId: 'ca-app-pub-7122196431098987/8563483937',
     });
   }
 
