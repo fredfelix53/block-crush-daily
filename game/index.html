@@ -11,7 +11,13 @@
   <div id="app">
     <!-- Header -->
     <header>
-      <h1>BLOCK CRUSH</h1>
+      <div class="header-top">
+        <h1>BLOCK CRUSH</h1>
+        <div class="header-buttons">
+          <button id="btn-shop" class="icon-btn" onclick="window.toggleShop()" title="Shop">🛒</button>
+          <button id="btn-achievements" class="icon-btn" onclick="window.toggleAchievements()" title="Achievements">🏆</button>
+        </div>
+      </div>
       <div class="header-info">
         <div class="score-box">
           <span class="label">SCORE</span>
@@ -24,6 +30,10 @@
         <div class="mode-box">
           <span id="mode-label">DAILY</span>
         </div>
+        <div class="coin-box" id="coin-display" onclick="window.toggleShop()">
+          <span class="coin-icon">🪙</span>
+          <span id="coin-amount">0</span>
+        </div>
       </div>
     </header>
 
@@ -33,6 +43,12 @@
       <span id="energy-text">⚡ 0/5</span>
     </div>
 
+    <!-- XP bar -->
+    <div id="xp-bar">
+      <div class="xp-fill" id="xp-fill"></div>
+      <span id="xp-text">LVL 1</span>
+    </div>
+
     <!-- Game board -->
     <div id="board-container">
       <canvas id="board" width="300" height="300"></canvas>
@@ -40,20 +56,23 @@
 
     <!-- Power-ups -->
     <div id="powerups">
-      <button class="pu-btn" id="pu-bomb" disabled>
+      <button class="pu-btn" id="pu-bomb">
         <span class="pu-icon">💣</span>
         <span class="pu-label">Bomb</span>
         <span class="pu-cost">⚡3</span>
+        <span class="pu-count" id="pu-count-bomb">0</span>
       </button>
-      <button class="pu-btn" id="pu-hammer" disabled>
+      <button class="pu-btn" id="pu-hammer">
         <span class="pu-icon">🔨</span>
         <span class="pu-label">Hammer</span>
         <span class="pu-cost">⚡2</span>
+        <span class="pu-count" id="pu-count-hammer">0</span>
       </button>
-      <button class="pu-btn" id="pu-shuffle" disabled>
+      <button class="pu-btn" id="pu-shuffle">
         <span class="pu-icon">🔀</span>
         <span class="pu-label">Shuffle</span>
         <span class="pu-cost">⚡4</span>
+        <span class="pu-count" id="pu-count-shuffle">0</span>
       </button>
     </div>
 
@@ -85,6 +104,8 @@
     </div>
   </div>
 
+  <script src="progression.js"></script>
+  <script src="shop.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

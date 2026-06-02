@@ -9,6 +9,9 @@
   const COLS = BOARD_SIZE;
   const ROWS = BOARD_SIZE;
   const MAX_ENERGY = 5;
+  const COINS_PER_LINE = 10;
+  const XP_PER_LINE = 5;
+  const XP_PER_GAME = 20;
   const DAILY_SEED_KEY = 'bcd_daily_seed';
   const SAVE_KEY = 'bcd_save';
   const TOTAL_DAILY_PIECES = 60; // pieces in daily challenge
@@ -52,6 +55,14 @@
 
   // High scores per mode
   let highScores = { daily: 0, practice: 0 };
+
+  // Progression hooks
+  let usedPowerupsThisGame = new Set();
+  let clearedThisGame = 0;
+  let coinsEarnedThisGame = 0;
+  let bestSingleThisGame = 0;
+  let dailyCompletedThisGame = false;
+  let allUsedThisGame = false;
 
   // Ad integration (native or simulated)
   let adPendingCallback = null;
@@ -248,6 +259,19 @@
     if (cleared >= 3) gainEnergy(1);
     if (cleared >= 5) gainEnergy(1);
     if (cleared >= 8) gainEnergy(1);
+    
+    // Progression: coins + XP for clearing
+    const P = window.GameProgression;
+    if (P) {
+      const coinReward = cleared * COINS_PER_LINE;
+      if (coinReward > 0) {
+        P.addCoins(coinReward, true);
+        coinsEarnedThisGame += coinReward;
+      }
+      P.addXP(cleared * XP_PER_LINE);
+      clearedThisGame += cleared;
+      if (cleared > bestSingleThisGame) bestSingleThisGame = cleared;
+    }
   }
 
   // --- Drawing ---
@@ -346,9 +370,13 @@
   }
 
   function updatePowerUps() {
-    btnBomb.disabled = energy < COST_BOMB;
-    btnHammer.disabled = energy < COST_HAMMER;
-    btnShuffle.disabled = energy < COST_SHUFFLE;
+    const P = window.GameProgression;
+    const hasBomb = energy >= COST_BOMB || (P && P.powerupItems?.bomb > 0);
+    const hasHammer = energy >= COST_HAMMER || (P && P.powerupItems?.hammer > 0);
+    const hasShuffle = energy >= COST_SHUFFLE || (P && P.powerupItems?.shuffle > 0);
+    btnBomb.disabled = !hasBomb;
+    btnHammer.disabled = !hasHammer;
+    btnShuffle.disabled = !hasShuffle;
   }
 
   // --- Placement ---
@@ -457,6 +485,14 @@
     if (!running) return;
     running = false;
 
+    // Record progression
+    const P = window.GameProgression;
+    if (P) {
+      dailyCompletedThisGame = won && mode === 'daily';
+      allUsedThisGame = won && mode === 'daily' && dailyPieceIndex >= TOTAL_DAILY_PIECES && pieces.every(p => p === null);
+      P.recordPlay(score, clearedThisGame, bestSingleThisGame, usedPowerupsThisGame.size >= 3, dailyCompletedThisGame, allUsedThisGame);
+    }
+
     // Update high score
     if (score > highScores[mode]) {
       highScores[mode] = score;
@@ -475,8 +511,9 @@
         <h2>${won ? '🎉 Daily Complete!' : '💥 Game Over'}</h2>
         <div class="go-score">${score}</div>
         <div class="go-new">${score >= highScores[mode] && score > 0 ? '🏆 New Best!' : ''}</div>
+        ${coinsEarnedThisGame > 0 ? `<div class="go-coins">🪙 +${coinsEarnedThisGame} coins earned</div>` : ''}
         <button class="go-reward" onclick="document.AD_DOUBLE()">
-          📺 Watch ad to double score
+          📺 Watch ad to double reward
         </button>
         <button class="go-continue" onclick="document.AD_CONTINUE()">
           Continue
@@ -489,8 +526,12 @@
     document.AD_DOUBLE = function() {
       showAd(function() {
         score *= 2;
+        if (P) {
+          P.addCoins(coinsEarnedThisGame, false); // double coins too
+        }
         document.querySelector('.go-score').textContent = score;
-        document.querySelector('.go-reward').remove();
+        const rewardBtn = document.querySelector('.go-reward');
+        if (rewardBtn) rewardBtn.remove();
         document.querySelector('.go-new').textContent = '🔥 Score doubled!';
       });
     };
@@ -595,6 +636,12 @@
     running = true;
     selectedPiece = -1;
     pieces = [];
+    usedPowerupsThisGame = new Set();
+    clearedThisGame = 0;
+    coinsEarnedThisGame = 0;
+    bestSingleThisGame = 0;
+    dailyCompletedThisGame = false;
+    allUsedThisGame = false;
     modeLabel.textContent = mode === 'daily' ? 'DAILY' : 'PRACTICE';
     btnDaily.classList.toggle('active', mode === 'daily');
     btnPractice.classList.toggle('active', mode === 'practice');
@@ -623,9 +670,26 @@
   }
 
   // --- Power-up actions ---
+  function usePowerupTry(type) {
+    // Try inventory item first
+    const P = window.GameProgression;
+    if (P && P.usePowerupItem(type)) {
+      usedPowerupsThisGame.add(type);
+      if (P) P.recordPowerupUse();
+      return true;
+    }
+    // Fall back to energy
+    const cost = type === 'bomb' ? COST_BOMB : type === 'hammer' ? COST_HAMMER : COST_SHUFFLE;
+    if (spendEnergy(cost)) {
+      usedPowerupsThisGame.add(type);
+      if (P) P.recordPowerupUse();
+      return true;
+    }
+    return false;
+  }
+
   function useBomb() {
-    if (!spendEnergy(COST_BOMB)) return;
-    // Clear a 2x2 area in center
+    if (!usePowerupTry('bomb')) return;
     const cr = Math.floor(ROWS / 2) - 1;
     const cc = Math.floor(COLS / 2) - 1;
     for (let r = Math.max(0, cr); r < Math.min(ROWS, cr + 2); r++) {
@@ -637,9 +701,7 @@
   }
 
   function useHammer() {
-    if (!spendEnergy(COST_HAMMER)) return;
-    // Remove a single block — choose the one with most recent placement
-    // Just remove first filled cell from bottom
+    if (!usePowerupTry('hammer')) return;
     for (let r = ROWS - 1; r >= 0; r--) {
       for (let c = 0; c < COLS; c++) {
         if (grid[r][c] !== 0) {
@@ -653,8 +715,7 @@
   }
 
   function useShuffle() {
-    if (!spendEnergy(COST_SHUFFLE)) return;
-    // Replace current pieces
+    if (!usePowerupTry('shuffle')) return;
     for (let i = 0; i < pieces.length; i++) {
       if (pieces[i]) {
         if (mode === 'daily' && dailyPieceIndex < TOTAL_DAILY_PIECES - 1) {
@@ -820,8 +881,17 @@
     });
   };
 
+  // --- Init progression ---
+  if (window.GameProgression) {
+    window.GameProgression.init();
+    window.reapplyTheme();
+    setTimeout(() => window.checkDailyBonus(), 800);
+  
   // --- Init ---
   loadGame();
   newGame('daily');
+
+  // Sync UI with shop counts periodically
+  setInterval(() => { if (window.updatePowerupCounts) window.updatePowerupCounts(); }, 2000);
 
 })();
